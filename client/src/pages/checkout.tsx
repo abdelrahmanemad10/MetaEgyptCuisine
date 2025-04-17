@@ -31,7 +31,8 @@ const CheckoutForm = () => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin,
+        // Redirect to the success or failure page based on the payment result
+        return_url: `${window.location.origin}/payment/success`,
       },
     });
 
@@ -56,14 +57,27 @@ const CheckoutForm = () => {
       <div className="space-y-6">
         <PaymentElement />
         
-        <Button 
-          type="submit" 
-          className="w-full" 
-          size="lg"
-          disabled={!stripe || isProcessing}
-        >
-          {isProcessing ? "Processing..." : "Pay Now"}
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            type="submit" 
+            className="flex-1" 
+            size="lg"
+            disabled={!stripe || isProcessing}
+          >
+            {isProcessing ? "Processing..." : "Pay Now"}
+          </Button>
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="flex-none" 
+            size="lg"
+            onClick={() => window.location.href = '/payment/cancel'}
+            disabled={isProcessing}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
     </form>
   );

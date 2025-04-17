@@ -7,7 +7,7 @@ import { storage } from "./storage";
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2023-10-16", // Use stable supported API version
+    apiVersion: "2025-03-31.basil" as any, // Using the version supported by our Stripe package
   });
 }
 import { z } from "zod";
@@ -218,6 +218,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error("Error creating payment intent:", errorMessage);
       res.status(500).json({ message: `Error creating payment intent: ${errorMessage}` });
+    }
+  });
+  
+  // Handle Stripe webhook events (important for production)
+  app.post('/api/webhook', async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable." 
+        });
+      }
+      
+      const sig = req.headers['stripe-signature'] as string;
+      let event;
+      
+      // For production, you should set a webhook secret in environment variables
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      
+      if (endpointSecret && sig) {
+        try {
+          // Verify and construct the event from the payload and signature
+          // This guarantees the request came from Stripe
+          event = stripe.webhooks.constructEvent(
+            req.body, 
+            sig, 
+            endpointSecret
+          );
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          console.log(`⚠️ Webhook signature verification failed: ${message}`);
+          return res.status(400).send(`Webhook Error: ${message}`);
+        }
+      } else {
+        // For simple testing without signature verification
+        event = req.body;
+      }
+      
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log(`💰 PaymentIntent ${paymentIntent.id} was successful!`);
+          // Here you would update your database to mark the order as paid
+          // Example: await storage.updateOrderStatus(orderId, 'paid');
+          break;
+          
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          console.log(`❌ Payment failed for PaymentIntent ${failedPayment.id}`);
+          break;
+          
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+      
+      // Return a 200 response to acknowledge receipt of the event
+      res.status(200).json({received: true});
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error handling webhook:", errorMessage);
+      res.status(500).json({ message: `Error handling webhook: ${errorMessage}` });
     }
   });
 
