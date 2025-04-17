@@ -93,6 +93,13 @@ const Navbar = () => {
             Contact
           </a>
           <a 
+            href="#order" 
+            onClick={() => handleLinkClick('order')}
+            className="nav-link text-foreground hover:text-primary transition-colors duration-300"
+          >
+            Order Online
+          </a>
+          <a 
             href="#reservation" 
             onClick={() => handleLinkClick('reservation')}
             className="reservation-animation"
@@ -146,6 +153,13 @@ const Navbar = () => {
             className="text-foreground hover:text-primary transition-colors duration-300 py-2 border-b border-border"
           >
             Contact
+          </a>
+          <a 
+            href="#order" 
+            onClick={() => handleLinkClick('order')}
+            className="text-foreground hover:text-primary transition-colors duration-300 py-2 border-b border-border"
+          >
+            Order Online
           </a>
           <a 
             href="#reservation" 
