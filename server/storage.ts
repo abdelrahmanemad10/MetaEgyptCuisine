@@ -66,11 +66,20 @@ export class MemStorage implements IStorage {
 
   async createReservation(insertReservation: InsertReservation): Promise<Reservation> {
     const id = this.reservationCurrentId++;
-    const reservation: Reservation = { 
-      ...insertReservation, 
-      id, 
+    
+    // Create a proper reservation object with all required fields
+    const reservation: Reservation = {
+      id,
+      name: insertReservation.name,
+      email: insertReservation.email,
+      phone: insertReservation.phone,
+      guests: insertReservation.guests,
+      date: insertReservation.date,
+      time: insertReservation.time,
+      specialRequests: insertReservation.specialRequests ?? "",
       status: "confirmed"
     };
+    
     this.reservationStore.set(id, reservation);
     return reservation;
   }
@@ -96,10 +105,20 @@ export class MemStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = this.orderCurrentId++;
-    const order: Order = { 
-      ...insertOrder, 
-      id, 
-      status: "received"
+    
+    // Create a proper order object with all required fields
+    const order: Order = {
+      id,
+      name: insertOrder.name,
+      email: insertOrder.email,
+      phone: insertOrder.phone,
+      address: insertOrder.address,
+      items: insertOrder.items,
+      total: insertOrder.total,
+      deliveryTime: insertOrder.deliveryTime,
+      specialInstructions: insertOrder.specialInstructions ?? "",
+      status: "received",
+      orderDate: insertOrder.orderDate
     };
     this.orderStore.set(id, order);
     return order;

@@ -8,6 +8,7 @@ import Gallery from "@/components/home/Gallery";
 import Chefs from "@/components/home/Chefs";
 import Testimonials from "@/components/home/Testimonials";
 import Reservation from "@/components/home/Reservation";
+import Order from "@/components/home/Order";
 import Map from "@/components/home/Map";
 import { useEffect } from "react";
 
@@ -33,6 +34,7 @@ const Home = () => {
       <Chefs />
       <Testimonials />
       <Reservation />
+      <Order />
       <Map />
       <Footer />
     </>
