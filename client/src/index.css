@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 60 33% 99%;
+    
+    --card: 0 0% 10%;
+    --card-foreground: 60 33% 99%;
+ 
+    --popover: 0 0% 10%;
+    --popover-foreground: 60 33% 99%;
+ 
+    --primary: 46 77% 44%;
+    --primary-foreground: 0 0% 7%;
+ 
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 60 33% 99%;
+ 
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 64%;
+ 
+    --accent: 0 0% 14%;
+    --accent-foreground: 60 33% 99%;
+ 
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 46 77% 44%;
+
+    --radius: 0.5rem;
+  }
+ 
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-['Montserrat'] antialiased scroll-smooth;
+  }
+
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-cormorant {
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    @apply bg-primary;
+    transition: width 0.3s;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .menu-item-transition {
+    transition: transform 0.3s ease;
+  }
+
+  .menu-item-transition:hover {
+    transform: translateY(-5px);
+  }
+
+  .gallery-image {
+    transition: transform 0.5s ease, filter 0.5s ease;
+  }
+
+  .gallery-image:hover {
+    transform: scale(1.03);
+    filter: brightness(1.1);
+  }
+
+  .reservation-animation {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 hsla(46, 77%, 44%, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px hsla(46, 77%, 44%, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 hsla(46, 77%, 44%, 0);
+    }
+  }
+}
