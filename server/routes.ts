@@ -7,7 +7,7 @@ import { storage } from "./storage";
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2023-10-16",
+    apiVersion: "2025-03-31.basil", // Use latest supported API version
   });
 }
 import { z } from "zod";
@@ -180,6 +180,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedOrder);
     } catch (error) {
       res.status(500).json({ message: "Error updating order status" });
+    }
+  });
+
+  // ===== STRIPE PAYMENT ROUTES =====
+  
+  // Create a payment intent for Stripe checkout
+  app.post("/api/create-payment-intent", async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable." 
+        });
+      }
+      
+      const { amount } = req.body;
+      
+      if (!amount || typeof amount !== 'number' || amount <= 0) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+      
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        // Verify the payment method for extra security,
+        // but allows automatic payment without requiring additional confirmation
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.status(200).json({
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error creating payment intent:", errorMessage);
+      res.status(500).json({ message: `Error creating payment intent: ${errorMessage}` });
     }
   });
 

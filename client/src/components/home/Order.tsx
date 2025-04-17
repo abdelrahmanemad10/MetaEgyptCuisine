@@ -5,6 +5,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,8 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { menuItems, type MenuItem } from "@/lib/menu-data";
 import { OrderItem } from "@shared/schema";
 
@@ -42,6 +44,7 @@ type OrderFormValues = z.infer<typeof orderSchema>;
 
 const Order = () => {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [cartItems, setCartItems] = useState<(OrderItem & { menuItem: MenuItem })[]>([]);
   
@@ -114,6 +117,24 @@ const Order = () => {
     ));
   };
   
+  // Proceed to checkout - save cart data and redirect
+  const proceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Please add items to your cart before proceeding to checkout.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save cart total in session storage for checkout page
+    sessionStorage.setItem('orderTotal', cartTotal.toString());
+    
+    // Redirect to checkout page
+    setLocation("/checkout");
+  };
+
   // Create order mutation
   const createOrder = useMutation({
     mutationFn: (orderData: OrderFormValues & { items: OrderItem[] }) => 
@@ -320,6 +341,21 @@ const Order = () => {
                         <div className="flex justify-between font-bold text-lg mb-4">
                           <span>Total:</span>
                           <span className="text-primary">LE {cartTotal}</span>
+                        </div>
+                        
+                        <div className="mb-6">
+                          <Button 
+                            onClick={proceedToCheckout} 
+                            className="w-full" 
+                            size="lg"
+                            variant="outline"
+                          >
+                            <i className="fas fa-credit-card mr-2"></i>
+                            Proceed to Checkout
+                          </Button>
+                          <div className="text-center mt-3 text-sm text-muted-foreground">
+                            or fill out the form below for cash on delivery
+                          </div>
                         </div>
                         
                         <Form {...form}>
